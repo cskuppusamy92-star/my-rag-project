@@ -1,14 +1,27 @@
 from backend.ingestion import ingest_file
 from backend.vector_store import VectorStore
 from backend.retrieval import Retriever
+from backend.llm import generate_answer
 
 
 class RAGPipeline:
     def __init__(self):
         self.store = VectorStore()
+
+        try:
+           self.store.load("data/vector_store")
+           print("Vector store loaded successfully.")
+        except FileNotFoundError:
+           print("No existing vector store found. Starting with empty store.")
+    
         self.retriever = Retriever(self.store)
 
-    def ingest(self, file_path: str, chunk_size: int = 500, chunk_overlap: int = 100):
+    def ingest(
+        self,
+        file_path: str,
+        chunk_size: int = 500,
+        chunk_overlap: int = 100
+    ):
         chunks = ingest_file(
             file_path,
             chunk_size=chunk_size,
@@ -19,7 +32,9 @@ class RAGPipeline:
         self.store.save("data/vector_store")
 
         return {
-            "documents": len(set(chunk.document_id for chunk in chunks)),
+            "documents": len(
+                set(chunk.document_id for chunk in chunks)
+            ),
             "chunks": len(chunks)
         }
 
@@ -29,4 +44,17 @@ class RAGPipeline:
             top_k=top_k
         )
 
-        return results
+        context = "\n\n".join(
+            result.text
+            for result in results
+        )
+
+        answer = generate_answer(
+            question,
+            context
+        )
+
+        return {
+            "answer": answer,
+            "results": results
+        }

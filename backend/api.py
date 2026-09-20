@@ -52,22 +52,23 @@ def health():
 
 @app.post("/query")
 def query(request: QueryRequest):
-    results = rag.query(
+    result = rag.query(
         request.question,
-        top_k=request.top_k,
+        top_k=request.top_k
     )
 
     return {
         "question": request.question,
+        "answer": result["answer"],
         "results": [
             {
-                "score": result.score,
-                "text": result.text,
-                "source_file": result.source_file,
-                "source_type": result.source_type,
-                "location": result.location,
-                "metadata": result.metadata,
+                "score": item.score,
+                "text": item.text,
+                "source_file": item.source_file,
+                "source_type": item.source_type,
+                "location": item.location,
+                "metadata": item.metadata,
             }
-            for result in results
+            for item in result["results"]
         ],
     }
