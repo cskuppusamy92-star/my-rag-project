@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+
+# Environment secrets
+.env
+
+# Application data
+data/
+
+# FAISS/index files
+*.faiss
+*.pkl
+
+# Streamlit
+.streamlit/
+
+# OS
+.DS_Store
+Thumbs.db
